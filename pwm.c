@@ -3,7 +3,13 @@
 
 #define PWM_NOMBRE_DE_CANAUX 2
 #define PWM_ESPACEMENT 6
+static unsigned char ValPWMEnCours[2];
+static unsigned short QuelPWMOnVeutModifier;   
+static unsigned short compteur_espacement = 0;
 
+//Recepteur
+static unsigned int InstantDebut[2];
+static unsigned short ValPWMEnCoursEM[2];
 /**
  * Convertit une valeur signée générique vers une valeur directement
  * utilisable pour la génération PWM.
@@ -11,16 +17,23 @@
  * @return Une valeur entre 62 et 125.
  */
 unsigned char pwmConversion(unsigned char valeurGenerique) {
-    // À implémenter...
-    return 0;
-}
+  
+    float Convert; // C'est extrêmement inélegant d'utiliser un float
+                   // Mais je n'ai pas d'autre solution en tête
+ 
+    Convert = valeurGenerique;
+    Convert = ((Convert*63)/255 + 62 + 0.5); // ici on à la valeur final
+    // comme l'arrondi se fait toujours contre le bas,
+    // le + 0.5 feinte cette spécificité 
+    return (unsigned short) Convert;
+   }
 
 /**
  * Indique sur quel canal la valeur doit changer.
  * @param canal Le numéro de canal.
  */
 void pwmPrepareValeur(unsigned char canal) {
-    // À implémenter...
+    QuelPWMOnVeutModifier = canal; 
 }
 
 /**
@@ -28,7 +41,16 @@ void pwmPrepareValeur(unsigned char canal) {
  * @param valeur La valeur du canal.
  */
 void pwmEtablitValeur(unsigned char valeur) {
-    // À implémenter...
+
+    switch(QuelPWMOnVeutModifier)
+    {
+        case 0 : ValPWMEnCours[0]= pwmConversion(valeur);
+        break;
+        
+        case 1 : ValPWMEnCours[1]= pwmConversion(valeur);
+        break;
+    }
+    return;
 }
 
 /**
@@ -37,8 +59,8 @@ void pwmEtablitValeur(unsigned char valeur) {
  * @return La valeur PWM correspondante au canal.
  */
 unsigned char pwmValeur(unsigned char canal) {
-    // À implémenter...
-    return 0;
+
+    return ValPWMEnCours[canal];
 }
 
 /**
@@ -48,8 +70,18 @@ unsigned char pwmValeur(unsigned char canal) {
  * @return 255 si il est temps d'émettre une pulse. 0 autrement.
  */
 unsigned char pwmEspacement() {
-    // À implémenter...
-    return 0;
+    static unsigned short compteur_espacement = 0;
+    
+    if (compteur_espacement == PWM_ESPACEMENT)
+    {
+        compteur_espacement=0;
+        return 255; // indique que la pérode est finie
+    }
+    else
+    {
+        compteur_espacement++;
+         return 0; // doit encore laisser la sortie à 0 pour arriver à 20ms
+    }
 }
 
 /**
@@ -58,7 +90,7 @@ unsigned char pwmEspacement() {
  * @param instant Instant de démarrage de la capture.
  */
 void pwmDemarreCapture(unsigned char canal, unsigned int instant) {
-    // À implémenter...
+    InstantDebut[canal] = instant;
 }
 
 /**
@@ -67,14 +99,14 @@ void pwmDemarreCapture(unsigned char canal, unsigned int instant) {
  * @param instant L'instant de finalisation de la capture.
  */
 void pwmCompleteCapture(unsigned char canal, unsigned int instant) {
-    // À implémenter...
+    ValPWMEnCoursEM[canal] = instant -  InstantDebut[canal];
 }
 
 /**
  * Réinitialise le système PWM.
  */
 void pwmReinitialise() {
-    // À implémenter...
+    compteur_espacement == PWM_ESPACEMENT;
 }
 
 #ifdef TEST
