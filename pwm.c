@@ -6,10 +6,8 @@
 static unsigned char ValPWMEnCours[2];
 static unsigned short QuelPWMOnVeutModifier;   
 static unsigned short compteur_espacement = 0;
-
-//Recepteur
 static unsigned int InstantDebut[2];
-static unsigned short ValPWMEnCoursEM[2];
+
 /**
  * Convertit une valeur signée générique vers une valeur directement
  * utilisable pour la génération PWM.
@@ -18,9 +16,8 @@ static unsigned short ValPWMEnCoursEM[2];
  */
 unsigned char pwmConversion(unsigned char valeurGenerique) {
   
-    float Convert; // C'est extrêmement inélegant d'utiliser un float
-                   // Mais je n'ai pas d'autre solution en tête
- 
+    float Convert;
+     
     Convert = valeurGenerique;
     Convert = ((Convert*63)/255 + 62 + 0.5); // ici on à la valeur final
     // comme l'arrondi se fait toujours contre le bas,
@@ -99,7 +96,7 @@ void pwmDemarreCapture(unsigned char canal, unsigned int instant) {
  * @param instant L'instant de finalisation de la capture.
  */
 void pwmCompleteCapture(unsigned char canal, unsigned int instant) {
-    ValPWMEnCoursEM[canal] = instant -  InstantDebut[canal];
+   ValPWMEnCours[canal] = instant -  InstantDebut[canal];
 }
 
 /**
